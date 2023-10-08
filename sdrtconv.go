@@ -1,37 +1,37 @@
 package main
 
 import (
+	"encoding/xml"
 	"flag"
 	"fmt"
 	"io"
-	"encoding/xml"
+	"log"
 	"os"
 	"strings"
-	"log"
 )
 
 type Playlist struct {
 	XMLName xml.Name `xml:"playlist"`
-	Aliases []Alias `xml:"alias"`
+	Aliases []Alias  `xml:"alias"`
 }
 
 type Alias struct {
-	XMLName xml.Name `xml:"alias"`
-	Group string `xml:"group,attr"`
-	Name string `xml:"name,attr"`
-	List string `xml:"list,attr"`
-	Priority int // set by us
-	TGIDs []TGID `xml:"id"`
+	XMLName  xml.Name `xml:"alias"`
+	Group    string   `xml:"group,attr"`
+	Name     string   `xml:"name,attr"`
+	List     string   `xml:"list,attr"`
+	Priority int      // set by us
+	TGIDs    []TGID   `xml:"id"`
 }
 
 type TGID struct {
-	XMLName xml.Name `xml:"id"`
-	Type string `xml:"type,attr"`
-	Priority int `xml:"priority,attr"`
-	Channel string `xml:"channel,attr"`
-	Value int `xml:"value,attr"`
-	Min int `xml:"min,attr"`
-	Max int `xml:"max,attr"`
+	XMLName  xml.Name `xml:"id"`
+	Type     string   `xml:"type,attr"`
+	Priority int      `xml:"priority,attr"`
+	Channel  string   `xml:"channel,attr"`
+	Value    int      `xml:"value,attr"`
+	Min      int      `xml:"min,attr"`
+	Max      int      `xml:"max,attr"`
 }
 
 func main() {
@@ -89,7 +89,6 @@ func main() {
 
 		defer wl.Close()
 
-
 		err = playlist.GenerateTSV(tgs, wl)
 		if err != nil {
 			log.Fatal(err)
@@ -120,20 +119,20 @@ func main() {
 func (a *Alias) writeCSVTG(tgid int, w io.Writer) error {
 	hexTg := strings.Replace(fmt.Sprintf("%X", tgid), "0X", "", 1)
 	_, err := io.WriteString(w, fmt.Sprintf("%d,%s,%s,%s,%s,%s,%s,%d\n",
-		tgid, // dec
-		hexTg, // hex
-		"D", // mode
-		a.Name, // alpha
-		a.Name, // desc
-		a.Group, // tag
-		a.List, // tag
+		tgid,       // dec
+		hexTg,      // hex
+		"D",        // mode
+		a.Name,     // alpha
+		a.Name,     // desc
+		a.Group,    // tag
+		a.List,     // tag
 		a.Priority, // prio
 	))
 
 	return err
 }
 
-//    Decimal,Hex,Mode,Alpha Tag,Description,Tag,Tag,Priority,Stream List
+// Decimal,Hex,Mode,Alpha Tag,Description,Tag,Tag,Priority,Stream List
 func (p *Playlist) GenerateCSV(csv io.Writer) error {
 	for _, a := range p.Aliases {
 		for _, t := range a.TGIDs {
